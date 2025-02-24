@@ -24,6 +24,8 @@ python -u direct-preference-optimization/train.py model=llama3-8b datasets=[PATH
 ## Data
 Along with this codebase, we also release the following datasets on HuggingFace:
 - [Roleplay](https://huggingface.co/datasets/sher222/persona-iterative-responses)
+- [Review](https://huggingface.co/datasets/Asap7772/steered_reviews_full_autolabel_gpt4o_pref)
+- [Elix](https://huggingface.co/datasets/Asap7772/elix_generations_gpt4omini_pref)
 
 <!-- ## BibTeX
 ```

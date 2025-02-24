@@ -159,7 +159,7 @@ def get_elix(
                 n_responses = len(data[prompt]['responses'])
                 data[prompt]['pairs'].append((n_responses, n_responses + 1))
                 data[prompt]['responses'].extend(responses)
-                data[prompt]['sft_target'] = chosen
+                data[prompt]['sft_target'].extend([chosen, rejected])
                 if include_level:
                     data[prompt]['level'].append(level)
                 
@@ -256,7 +256,7 @@ def get_review(
                 n_responses = len(data[prompt]['responses'])
                 data[prompt]['pairs'].append((n_responses, n_responses + 1))
                 data[prompt]['responses'].extend(responses)
-                data[prompt]['sft_target'] = chosen
+                data[prompt]['sft_target'].extend([chosen, rejected])
                 if include_level:
                     data[prompt]['level'].append(level)
                 
@@ -271,7 +271,6 @@ def get_roleplay(
     num_shots=8, 
     include_disprefferred=True, 
     add_persona=False,
-    prefft=False,
     include_level=False
 ) -> Dict[str, Dict[str, Union[List[Tuple[int, int]], List[str], str]]]:
     print(f'Loading roleplay dataset ({split} split) from Huggingface...')
@@ -323,10 +322,7 @@ def get_roleplay(
                 n_responses = len(data[prompt]['responses'])
                 data[prompt]['pairs'].append((n_responses, n_responses + 1))
                 data[prompt]['responses'].extend(responses)
-                if prefft:
-                    data[prompt]['sft_target'].extend([chosen, rejected])
-                else:
-                    data[prompt]['sft_target'] = chosen
+                data[prompt]['sft_target'].extend([chosen, rejected])
                 if include_level:
                     data[prompt]['level'].append(response_row['score_persona'])
 
@@ -337,44 +333,14 @@ def get_roleplay(
 
 def get_dataset(name: str, split: str, silent: bool = False, cache_dir: str = None, include_level=False):
     """Load the given dataset by name. Supported by default are 'shp', 'hh', and 'se'."""
-    if name == 'elix_zero_shot':
-        data = get_elix(split, silent=silent, cache_dir=cache_dir, include_disprefferred=True, include_level=include_level, autolabel=False, num_shots=0)
-    elif name == 'elix_easy':
-        data = get_elix(split, silent=silent, cache_dir=cache_dir, include_disprefferred=True, include_level=include_level, autolabel=False, scorer_match=True)
-    elif name == 'elix':
+    if name == 'elix':
         data = get_elix(split, silent=silent, cache_dir=cache_dir, include_disprefferred=True, include_level=include_level, autolabel=False)
-    elif name == 'elix_multiuser':
-        data = get_elix(split, silent=silent, cache_dir=cache_dir, include_disprefferred=True, include_level=include_level, autolabel=False, multi_user=True)
-    elif name == 'elix_prefonly':
-        data = get_elix(split, silent=silent, cache_dir=cache_dir, include_disprefferred=False, include_level=include_level, autolabel=False)
-    elif name == 'elix_prefonly_persona':
-        data = get_elix(split, silent=silent, cache_dir=cache_dir, include_disprefferred=False, add_persona=True, include_level=include_level, autolabel=False)
-    elif name == 'elix_persona':
-        data = get_elix(split, silent=silent, cache_dir=cache_dir, include_disprefferred=True, add_persona=True, include_level=include_level, autolabel=False)
-    elif name == 'elix_prefonly_persona_teacherforced':
-        data = get_elix(split, silent=silent, cache_dir=cache_dir, include_disprefferred=False, add_persona=True, include_level=include_level, autolabel=False, teacher_forced=True)
-    elif name == 'elix_persona_teacherforced':
-        data = get_elix(split, silent=silent, cache_dir=cache_dir, include_disprefferred=True, add_persona=True, include_level=include_level, autolabel=False, teacher_forced=True)
-    elif name == 'review_zero_shot':
-        data = get_review(split, silent=silent, cache_dir=cache_dir, include_disprefferred=True, include_level=include_level, autolabel=False, num_shots=0)
-    elif name == 'review':
-        data = get_review(split, silent=silent, cache_dir=cache_dir, include_disprefferred=True, include_level=include_level, autolabel=False)
+    elif name == 'review_4shot':
+        data = get_review(split, silent=silent, cache_dir=cache_dir, include_disprefferred=True, include_level=include_level, autolabel=False, num_shots=8)
     elif name == 'review_8shot':
         data = get_review(split, silent=silent, cache_dir=cache_dir, include_disprefferred=True, include_level=include_level, autolabel=False, num_shots=8)
-    elif name == 'review_prefonly':
-        data = get_review(split, silent=silent, cache_dir=cache_dir, include_disprefferred=False, include_level=include_level, autolabel=False)
-    elif name == 'review_prefonly_persona':
-        data = get_review(split, silent=silent, cache_dir=cache_dir, include_disprefferred=False, add_persona=True, include_level=include_level, autolabel=False)
-    elif name == 'review_persona':
-        data = get_review(split, silent=silent, cache_dir=cache_dir, include_disprefferred=True, add_persona=True, include_level=include_level, autolabel=False)
-    elif name == 'review_prefonly_persona_teacherforced':
-        data = get_review(split, silent=silent, cache_dir=cache_dir, include_disprefferred=False, add_persona=True, include_level=include_level, autolabel=False, teacher_forced=True)
-    elif name == 'review_persona_teacherforced':
-        data = get_review(split, silent=silent, cache_dir=cache_dir, include_disprefferred=True, add_persona=True, include_level=include_level, autolabel=False, teacher_forced=True)
     elif name == 'roleplay':
-        data = get_roleplay(split, silent=silent, cache_dir=cache_dir, num_shots=8, include_disprefferred=True, add_persona=False, prefft=False)
-    elif name == 'roleplay-prefft':
-        data = get_roleplay(split, silent=silent, cache_dir=cache_dir, num_shots=8, include_disprefferred=True, add_persona=False, prefft=True)
+        data = get_roleplay(split, silent=silent, cache_dir=cache_dir, num_shots=8, include_disprefferred=True, add_persona=False, include_level=include_level)
     else:
         raise ValueError(f"Unknown dataset '{name}'")
 
@@ -585,7 +551,7 @@ if __name__ == "__main__":
     tokenizer.pad_token_id = tokenizer.eos_token_id
     print("CHAT", tokenizer.chat_template)
     iterator = get_batch_iterator(
-        ["persona"],
+        ["roleplay"],
         tokenizer,
         split="test",
         batch_size=8,
