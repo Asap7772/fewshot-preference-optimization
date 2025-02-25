@@ -511,18 +511,21 @@ def get_batch_iterator(names: List[str],
             if done:
                 break
             if sft_mode:
-                batch_element = tokenize_batch_element(prompt, sft_target, sft_target, truncation_mode, tokenizer, max_length, max_prompt_length)
-                batch_element = {k: v for k, v in batch_element.items() if 'rejected' not in k}
-                batch.append({**batch_element, **extra})
-                example_idx += 1
-                if len(batch) == batch_size:
-                    yield collate_fn(batch)
-                    if n_examples is not None and example_idx >= n_examples:
-                        if not silent:
-                            print(f'Finished generating {n_examples} examples on {split} split')
-                        done = True
+                if isinstance(sft_target, str):
+                    sft_target = [sft_target]
+                for s in sft_target:
+                    batch_element = tokenize_batch_element(prompt, s, s, truncation_mode, tokenizer, max_length, max_prompt_length)
+                    batch_element = {k: v for k, v in batch_element.items() if 'rejected' not in k}
+                    batch.append({**batch_element, **extra})
+                    example_idx += 1
+                    if len(batch) == batch_size:
+                        yield collate_fn(batch)
+                        if n_examples is not None and example_idx >= n_examples:
+                            if not silent:
+                                print(f'Finished generating {n_examples} examples on {split} split')
+                            done = True
 
-                    batch = []
+                        batch = []
             else:
                 for p in pairs:
                     if done:
@@ -544,39 +547,3 @@ def get_batch_iterator(names: List[str],
     
     if exact and len(batch) > 0: ## for generation we need that last bit
         yield collate_fn(batch)
-
-if __name__ == "__main__":
-    tokenizer = AutoTokenizer.from_pretrained('meta-llama/Llama-3.2-3B-Instruct')
-    tokenizer.pad_token = tokenizer.eos_token
-    tokenizer.pad_token_id = tokenizer.eos_token_id
-    print("CHAT", tokenizer.chat_template)
-    iterator = get_batch_iterator(
-        ["roleplay"],
-        tokenizer,
-        split="test",
-        batch_size=8,
-        max_length=4096 * 8,
-        max_prompt_length=4096 * 8,
-        sft_mode=True,
-        n_epochs=1,
-        seed=0,
-        silent=False,
-        shuffle=True,
-        n_examples=1024,
-    )
-    lengths = []
-    count = 0
-    for i in tqdm.tqdm(iterator):
-        lengths.append(i['chosen_input_ids'].size(1))
-        # breakpoint()
-        # if count > 10_000:
-        #     break
-        count += 1
-    # print("max length", )
-    breakpoint()
-    max(lengths)
-    mean_length = np.mean(lengths)
-    median_length = np.median(lengths)
-    print(f"Max length: {max(lengths)}, Mean length: {mean_length}, Median length: {median_length}")
-    percentage_less_than_4096 = sum(l < 4096 for l in lengths) / len(lengths) * 100
-    print(f"Percentage of lengths less than 4096: {percentage_less_than_4096}%")
