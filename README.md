@@ -1,6 +1,6 @@
 # FSPO: Few-Shot Preference Optimization
 
-Code for [FSPO: Few-Shot Preference Optimization of Synthetic Data Elicits LLM Personalization to Real Users](https://arxiv.org/abs/). 
+Code for [FSPO: Few-Shot Preference Optimization of Synthetic Data Elicits LLM Personalization to Real Users](https://www.arxiv.org/abs/2502.19312). 
 
 
 ## What is in this repo?
@@ -28,11 +28,15 @@ Along with this codebase, we also release the following datasets on HuggingFace:
 - [Review](https://huggingface.co/datasets/Asap7772/steered_reviews_full_autolabel_gpt4o_pref)
 - [Elix](https://huggingface.co/datasets/Asap7772/elix_generations_gpt4omini_pref)
 
-<!-- ## BibTeX
+## BibTeX
 ```
-@misc{hsu2024groundingtryingllmsreinforcement,
-      title={Grounding by Trying: LLMs with Reinforcement Learning-Enhanced Retrieval}, 
-      author={Sheryl Hsu and Omar Khattab and Chelsea Finn and Archit Sharma},
-      year={2024}
+@misc{singh2025fspofewshotpreferenceoptimization,
+      title={FSPO: Few-Shot Preference Optimization of Synthetic Preference Data in LLMs Elicits Effective Personalization to Real Users}, 
+      author={Anikait Singh and Sheryl Hsu and Kyle Hsu and Eric Mitchell and Stefano Ermon and Tatsunori Hashimoto and Archit Sharma and Chelsea Finn},
+      year={2025},
+      eprint={2502.19312},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2502.19312}, 
 }
-``` -->
+```
